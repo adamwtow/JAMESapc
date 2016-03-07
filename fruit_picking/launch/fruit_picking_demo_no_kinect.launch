@@ -1,0 +1,26 @@
+<launch>
+
+  <!-- Launch moveit planning execution -->
+  <include file="$(find ur5_moveit_config)/launch/ur5_moveit_planning_execution.launch">
+  <arg name="limited" value="true" />
+  </include>
+
+  <!-- Launch moveit rviz -->
+  <include file="$(find ur5_moveit_config)/launch/moveit_rviz.launch">
+  <arg name="config" value="true" />
+  </include>
+
+  <!-- Launch capsicum segmentation nodes -->
+  <include file="$(find capsicum_detection)/launch/capsicum_segmentation.launch">
+  </include>
+
+  <!-- Launch ros_kinfu execution -->
+  <include file="$(find ros_kinfu)/launch/ros_kinfu.launch">
+  </include>
+
+  <!-- Launch capsicum segmentation nodes -->
+  <include file="$(find superquadric_fitter)/launch/superquadric_fitter.launch">
+  </include>
+
+</launch>
+

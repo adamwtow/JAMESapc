@@ -1,0 +1,14 @@
+gripper_controller1:
+    controller:
+        package: dynamixel_controllers
+        module: joint_position_controller_dual_motor
+        type: JointPositionControllerDual
+    joint_name: gripper_joint1
+    joint_speed: 5
+    motor_master:
+        id: 6
+        init: 0
+        min: 0
+        max: 4095
+    motor_slave:
+        id: 1

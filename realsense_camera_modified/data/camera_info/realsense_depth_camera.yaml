@@ -1,0 +1,20 @@
+image_width: 640                                                                                                               
+image_height: 480                                                                                                              
+camera_name: realsense_depth_camera                                                                                                        
+camera_matrix:                                                                                                                 
+    rows: 3                                                                                                                    
+    cols: 3                                                                                                                    
+    data: [468.1732, 0, 324.7752, 0, 468.8642, 259.0624 , 0, 0, 1]                                                             
+distortion_model: plumb_bob                                                                                                    
+distortion_coefficients:                                                                                                       
+    rows: 1                                                                                                                    
+    cols: 5                                                                                                                    
+    data: [-0.15458, 0.015396, 0.0030387, 0.003944, 0]                                                                         
+rectification_matrix:                                                                                                          
+    rows: 3                                                                                                                    
+    cols: 3                                                                                                                    
+    data: [1, 0, 0, 0, 1, 0, 0, 0, 1]                                                                                          
+projection_matrix:                                                                                                             
+    rows: 3                                                                                                                    
+    cols: 4                                                                                                                    
+    data: [472.9495, -4.0389, 317.7539, 10761.9147, 4.6478, 466.195, 263.7946, 111.9331, 0.014868, -0.010207, 0.99984, 0.60034]

@@ -1,0 +1,29 @@
+<launch>
+	<node name="find_grasps" pkg="agile_grasp" type="find_grasps" output="screen">
+  	<param name="cloud_topic" value="/camera/depth_registered/points" />
+    <param name="cloud_frame" value="/camera_rgb_optical_frame" />
+    <param name="cloud_type" value="0" />
+    <param name="svm_file_name" value="$(find agile_grasp)/svm_032015_20_20_same" />
+    <param name="num_samples" value="4000" />
+    <param name="num_threads" value="4" />
+    <param name="num_clouds" value="1" />
+    <!-- <rosparam param="workspace"> [-0.5, 0.5, -0.1, 1, 0.5,1.0] </rosparam> -->
+    <rosparam param="workspace"> [-0.15, 0.15, -0.15, 0.15, 0,0.2] </rosparam> 
+
+    <!-- <rosparam param="workspace"> [0.6, 1.0, -0.26, 0.14, -0.23, 1]  </rosparam> -->
+
+
+    <rosparam param="camera_pose"> [0, 0.445417, 0.895323, 0.215, 
+              1, 0, 0, -0.015, 
+              0, 0.895323, -0.445417, 0.23, 
+              0, 0, 0, 1] </rosparam>
+    <param name="min_inliers" value="20" />
+    <param name="plotting" value="2" /> <!-- 0=none, 1=pcl, 2=rviz-->
+    <param name="marker_lifetime" value="5" />
+	</node>
+	<node pkg="rviz" type="rviz" name="rviz" args="-d $(find agile_grasp)/rviz/single_camera.rviz" output="log">
+        </node>
+
+	<node pkg="tf" type="static_transform_publisher" name="link1_broadcaster" args="-0.135626101016 0.16398949314 0.893617320944 0.0327478117805 0.834110537945 -0.550501750563 0.0116195498961 /camera_rgb_optical_frame /my_ws 100" />
+
+</launch>

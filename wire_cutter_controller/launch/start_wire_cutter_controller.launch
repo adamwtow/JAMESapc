@@ -1,0 +1,11 @@
+<launch>
+    <!-- Start nozzle joint controller -->
+    <rosparam file="$(find wire_cutter_controller)/config/wire_cutter_position.yaml" command="load"/>
+    <node name="wire_cutte_controller_spawner" pkg="dynamixel_controllers" type="controller_spawner.py"
+          args="--manager=dxl_manager
+                --port motor_port
+                wire_cutter_controller1"
+          output="screen"/>
+
+</launch>
+

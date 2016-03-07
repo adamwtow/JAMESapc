@@ -1,0 +1,23 @@
+<launch>
+  <include file="$(find ur_bringup)/launch/ur5_bringup.launch">
+    <arg name="robot_ip" value="harvey"/>
+    <arg name="limited" value="true" />
+    <!--arg name="reverse_port" value="REVERSE_PORT"-->
+  </include>
+
+  <!-- Launch moveit planning execution -->
+  <include file="$(find ur5_moveit_config)/launch/ur5_moveit_planning_execution.launch">
+  <arg name="limited" value="true" />
+  </include>
+
+  <!-- Launch moveit rviz -->
+  <include file="$(find ur5_moveit_config)/launch/moveit_rviz.launch">
+  <arg name="config" value="true" />
+  </include>
+
+  <!-- Launch kinect2 sensor -->
+  <include file="$(find kinect2_bridge)/launch/kinect2_bridge.launch">
+  </include>
+
+</launch>
+

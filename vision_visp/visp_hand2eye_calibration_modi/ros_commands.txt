@@ -1,0 +1,6 @@
+1. ./visp_hand2eye_calibration_client 
+2. rosbag play ./test03.bag -r 0.00001
+3. rosrun visp_hand2eye_calibration visp_hand2eye_calibration_calibrator
+4. rostopic pub alib_start std_msgs/Empty
+
+
