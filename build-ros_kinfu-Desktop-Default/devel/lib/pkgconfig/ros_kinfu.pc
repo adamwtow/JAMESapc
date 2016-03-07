@@ -1,8 +1,0 @@
-prefix=/home/apc/harvey_ws/src/harvey/build-ros_kinfu-Desktop-Default/devel
-
-Name: ros_kinfu
-Description: Description of ros_kinfu
-Version: 0.0.0
-Cflags: 
-Libs: -L/home/apc/harvey_ws/src/harvey/build-ros_kinfu-Desktop-Default/devel/lib 
-Requires: geometry_msgs image_transport message_filters roscpp sensor_msgs std_msgs tf cv_bridge pcl_ros eigen_conversions tf_conversions
