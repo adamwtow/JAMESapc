@@ -14,7 +14,8 @@ find_package(catkin REQUIRED COMPONENTS
   eigen_conversions
   tf_conversions
 )
-
+set(OpenCV_INCLUDE_DIR "/usr/local/include/opencv2/ /usr/local/include/opencv/")
+set(OpenCV_LIBS "/usr/local/lib/")
 if (EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/cmake/CustomPCLConfig.cmake")
   set(KINFU_CONFIGURED true)
   message(STATUS "kinfu: cmake/CustomPCLConfig.cmake found, kinfu will be built.")
@@ -70,6 +71,7 @@ include_directories(
   include
   ${catkin_INCLUDE_DIRS}
   /home/apc_ws
+  ${OpenCV_INCLUDE_DIR}
 )
 
 if (${KINFU_CONFIGURED})
@@ -82,6 +84,7 @@ if (${KINFU_CONFIGURED})
     ${CUDA_LIBRARIES}
     ${PCL_LIBRARIES}
     ${catkin_LIBRARIES}
+    ${OpenCV_LIBS}
   )
 endif()
 

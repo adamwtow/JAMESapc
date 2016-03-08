@@ -373,4 +373,3 @@ void capsicum_detector::filterImage(cv::Mat &Image, cv::Mat &filtered_Image)
 
     cv::blur(Image, filtered_Image, cv::Size(MAX_KERNEL_LENGTH,MAX_KERNEL_LENGTH), cv::Point(-1,-1));
 }
-

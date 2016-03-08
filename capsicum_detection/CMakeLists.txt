@@ -20,7 +20,9 @@ find_package(catkin REQUIRED COMPONENTS
 find_package(OpenCV REQUIRED)
 find_package(OpenMP)
 #find_package(PCL REQUIRED)
-
+set(OpenCV_INCLUDE_DIR "/usr/local/include/opencv2/ /usr/local/include/opencv/")
+set(OpenCV_LIBS "/usr/local/lib/")
+message(STATUS "opencv include dir: " ${OpenCV_INCLUDE_DIR})
 if (EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/cmake/CustomPCLConfig.cmake")
   set(PCL_CONFIGURED true)
   message(STATUS "pcl: cmake/CustomPCLConfig.cmake found, project will be built.")

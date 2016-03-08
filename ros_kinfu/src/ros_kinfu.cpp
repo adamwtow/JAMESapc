@@ -95,7 +95,7 @@ namespace pc = pcl::console;
 
 
     sync = new message_filters::Synchronizer<SyncPolicy>(SyncPolicy(2), *colorImageSubscriberFilter, *depthImageSubscriberFilter);
-    cout << "eXECUTING" << endl;
+
   }
 
 
