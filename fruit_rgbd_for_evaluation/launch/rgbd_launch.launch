@@ -1,7 +1,0 @@
-
-<launch>
-  <node name="mico_camera_static_tf" pkg="tf" type="static_transform_publisher" 
-   args="-0.025 0 0 0 1.57 -1.57 /mico_link_hand /camera_link 50"/>
-</launch>
-
-

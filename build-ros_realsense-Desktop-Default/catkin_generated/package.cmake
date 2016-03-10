@@ -1,0 +1,7 @@
+set(_CATKIN_CURRENT_PACKAGE "ros_realsense")
+set(ros_realsense_MAINTAINER "james <james@todo.todo>")
+set(ros_realsense_DEPRECATED "")
+set(ros_realsense_VERSION "0.0.0")
+set(ros_realsense_BUILD_DEPENDS )
+set(ros_realsense_RUN_DEPENDS )
+set(ros_realsense_BUILDTOOL_DEPENDS "catkin")

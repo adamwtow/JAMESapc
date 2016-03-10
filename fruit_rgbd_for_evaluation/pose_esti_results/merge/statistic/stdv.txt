@@ -1,9 +1,0 @@
-ICP standard deviations in position x=0.032, y=0.110, z=0.046 (in metre)
-ICP standard deviations in orientation roll=70.772, pitch=-54.057, yaw=83.747 (in deg)
-
-NDT standard deviations in position x=0.185, y=0.143, z=0.195 (in metre)
-NDT standard deviations in orientation roll=88.941, pitch=3.349, yaw=44.197 (in deg)
-
-
-Kinfu standard deviations in position x=0.023, y=0.015, z=0.004 (in metre)
-Kinfu standard deviations in orientation roll=39.474, pitch=3.343, yaw=47.897 (in deg)

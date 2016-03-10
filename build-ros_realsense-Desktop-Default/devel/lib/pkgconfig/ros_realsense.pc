@@ -1,0 +1,8 @@
+prefix=/home/james/ros_ws/src/HARVEYapc/build-ros_realsense-Desktop-Default/devel
+
+Name: ros_realsense
+Description: Description of ros_realsense
+Version: 0.0.0
+Cflags: 
+Libs: -L/home/james/ros_ws/src/HARVEYapc/build-ros_realsense-Desktop-Default/devel/lib 
+Requires: 

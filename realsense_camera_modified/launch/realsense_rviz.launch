@@ -4,12 +4,12 @@
 
 
 	<arg name="debug_depth_unit" default="false" />
-	
-    <include file="$(find realsense_camera)/launch/realsense_camera.launch">
+
+    <include file="$(find realsense_camera_modified)/launch/realsense_camera.launch">
     	<param name="debug_depth_unit" value="$(arg debug_depth_unit)" />
     </include>
 
-    
-    <node name="realsense_rviz" pkg="rviz" type="rviz" args="-d $(find realsense_camera)/config/realsense.rviz" />
+
+    <node name="realsense_rviz" pkg="rviz" type="rviz" args="-d $(find realsense_camera_modified)/config/realsense.rviz" />
 
 </launch>

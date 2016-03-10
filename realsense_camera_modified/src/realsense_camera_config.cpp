@@ -7,8 +7,8 @@
 #include <std_msgs/Header.h>
 #include <iostream>
 
-#include "realsense_camera/realsenseConfig.h"
-
+#include "realsense_camera_modified/realsenseConfig.h"
+using namespace realsense_camera_modified;
 
 
 
@@ -20,7 +20,7 @@ float config_step;
 ros::Publisher config_pub;
 
 
-void 
+void
 showCurConfig()
 {
     printf("config:\n"
@@ -34,7 +34,7 @@ showCurConfig()
 
 
 
-void 
+void
 defaultConfig()
 {
 	depth_raw_unit = depth_raw_nuit_default;
@@ -42,7 +42,7 @@ defaultConfig()
 }
 
 
-void 
+void
 help()
 {
     puts("9 - help");
@@ -59,18 +59,18 @@ help()
     puts("-----------------------------------");
     puts("c/C - depth_raw_unit -/+ step");
     puts("-----------------------------------");
-    
+
 }
 
 
 void sendConfigMsg()
 {
-    realsense_camera::realsenseConfig config;
+    realsense_camera_modified::realsenseConfig config;
 
     config.depth_raw_unit = depth_raw_unit;
-    
+
     config_pub.publish (config);
-    
+
     //showCurSetting();
     //std::cout << std::endl << "sendConfigMsg" << std::endl;
 }
@@ -91,13 +91,13 @@ void keyLoop()
 {
     char c = 0;
     bool send = false;
- 
- 
-    // get the console in raw mode                                                              
+
+
+    // get the console in raw mode
     tcgetattr(kfd, &cooked);
     memcpy(&raw, &cooked, sizeof(struct termios));
     raw.c_lflag &=~ (ICANON | ECHO);
-    // Setting a new line, then end of file                         
+    // Setting a new line, then end of file
     raw.c_cc[VEOL] = 1;
     raw.c_cc[VEOF] = 2;
     tcsetattr(kfd, TCSANOW, &raw);
@@ -107,7 +107,7 @@ void keyLoop()
 
     while(1)
     {
-        // get the next event from the keyboard  
+        // get the next event from the keyboard
         if(read(kfd, &c, 1) < 0)
         {
             perror("read():");
@@ -186,7 +186,7 @@ void keyLoop()
                 std::cout << std::endl << "config_step = " << config_step << std::endl;
             }
             break;
-            
+
             case 0x63:
             {
             	depth_raw_unit -= config_step;
@@ -194,7 +194,7 @@ void keyLoop()
                 send = true;
             }
             break;
-            
+
             case 0x43:
             {
             	depth_raw_unit += config_step;
@@ -202,7 +202,7 @@ void keyLoop()
                 send = true;
             }
             break;
-            
+
             case 0x0A:
             {
                 showCurConfig();
@@ -260,7 +260,7 @@ int main(int argc, char** argv)
 
 
 
-    config_pub = n.advertise<realsense_camera::realsenseConfig>("/realsense_camera_config", 1);
+    config_pub = n.advertise<realsense_camera_modified::realsenseConfig>("/realsense_camera_config", 1);
 
     defaultConfig();
 

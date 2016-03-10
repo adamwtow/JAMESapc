@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8.3)
-project(realsense_camera_modified)
+project(ros_realsense)
 
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
@@ -14,7 +14,38 @@ find_package(catkin REQUIRED COMPONENTS
   camera_info_manager
   cv_bridge
 )
+if (EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/cmake/CustomPCLConfig.cmake")
+  set(PCL_CONFIGURED true)
+else()
+  set(PCL_CONFIGURED false)
+endif()
+include(CheckCXXCompilerFlag)
+CHECK_CXX_COMPILER_FLAG("-std=c++11" COMPILER_SUPPORTS_CXX11)
+CHECK_CXX_COMPILER_FLAG("-std=c++0x" COMPILER_SUPPORTS_CXX0X)
+if(COMPILER_SUPPORTS_CXX11)
+    set(CMAKE_CXX_FLAGS "-std=c++11")
+elseif(COMPILER_SUPPORTS_CXX0X)
+    set(CMAKE_CXX_FLAGS "-std=c++0x")
+else()
+    message(FATAL_ERROR "The compiler ${CMAKE_CXX_COMPILER} has no C++11 support. Please use a different C++ compiler.")
+endif()
+if (${PCL_CONFIGURED})
+  include(cmake/CustomPCLConfig.cmake)
+  find_package(PCL CONFIG REQUIRED)
+  include_directories(${PCL_INCLUDE_DIRS})
+  link_directories(${PCL_LIBRARY_DIRS})
+  add_definitions(${PCL_DEFINITIONS})
 
+  find_package(CUDA REQUIRED)
+
+  if (CUDA_FOUND)
+      message(" * CUDA ${CUDA_VERSION} was found")
+      include_directories(${CUDA_INCLUDE_DIRS})
+  else(CUDA_FOUND)
+      message(" * CUDA is not found")
+      message(FATAL_ERROR "Not all CUDA libraries are found")
+  endif(CUDA_FOUND)
+endif()
 
 # OpenCV
 find_package(OpenCV REQUIRED)
@@ -27,10 +58,6 @@ ENDIF (OPENCV_FOUND)
 find_package(PCL 1.8 REQUIRED COMPONENTS
     common
     io
-)
-
-generate_dynamic_reconfigure_options(
-  config/RealsenseCamera.cfg
 )
 
 ## System dependencies are found with CMake's conventions
@@ -51,10 +78,10 @@ generate_dynamic_reconfigure_options(
 ## * Let MSG_DEP_SET be the set of packages whose message types you use in
 ##   your messages/services/actions (e.g. std_msgs, actionlib_msgs, ...).
 ## * In the file package.xml:
+##   * add a build_depend tag for "message_generation"
 ##   * add a build_depend and a run_depend tag for each package in MSG_DEP_SET
-##   * If MSG_DEP_SET isn't empty the following dependencies might have been
-##     pulled in transitively but can be declared for certainty nonetheless:
-##     * add a build_depend tag for "message_generation"
+##   * If MSG_DEP_SET isn't empty the following dependency has been pulled in
+##     but can be declared for certainty nonetheless:
 ##     * add a run_depend tag for "message_runtime"
 ## * In this file (CMakeLists.txt):
 ##   * add "message_generation" and every package in MSG_DEP_SET to
@@ -90,25 +117,28 @@ generate_dynamic_reconfigure_options(
 ## Generate added messages and services with any dependencies listed here
 # generate_messages(
 #   DEPENDENCIES
-#   std_msgs
+#   std_msgs  # Or other packages containing msgs
 # )
 
+################################################
+## Declare ROS dynamic reconfigure parameters ##
+################################################
 
-add_message_files(
-  FILES
-  realsenseConfig.msg
-)
+## To declare and build dynamic reconfigure parameters within this
+## package, follow these steps:
+## * In the file package.xml:
+##   * add a build_depend and a run_depend tag for "dynamic_reconfigure"
+## * In this file (CMakeLists.txt):
+##   * add "dynamic_reconfigure" to
+##     find_package(catkin REQUIRED COMPONENTS ...)
+##   * uncomment the "generate_dynamic_reconfigure_options" section below
+##     and list every .cfg file to be processed
 
-add_service_files(
-  FILES
-  get_rgb_uv.srv
-)
-
-generate_messages(
-  DEPENDENCIES
-  realsense_camera_modified
-)
-
+## Generate dynamic reconfigure parameters in the 'cfg' folder
+# generate_dynamic_reconfigure_options(
+#   cfg/DynReconf1.cfg
+#   cfg/DynReconf2.cfg
+# )
 
 ###################################
 ## catkin specific configuration ##
@@ -121,8 +151,8 @@ generate_messages(
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
 #  INCLUDE_DIRS include
-#  LIBRARIES realsense_camera
-#  CATKIN_DEPENDS roscpp std_msgs
+#  LIBRARIES ros_realsense
+#  CATKIN_DEPENDS other_catkin_pkg
 #  DEPENDS system_lib
 )
 
@@ -132,75 +162,50 @@ catkin_package(
 
 ## Specify additional locations of header files
 ## Your package locations should be listed before other locations
-# include_directories(include)
+include(cmake/CustomPCLConfig.cmake)
 include_directories(
   ${catkin_INCLUDE_DIRS}
   ${OpenCV_INCLUDE_DIRS}
   ${PCL_INCLUDE_DIRS}
 )
 
-
-
 link_directories(
   ${OpenCV_LIBRARY_DIRS}
   ${PCL_LIBRARY_DIRS}
 )
-
-
 
 add_definitions(
   ${OpenCV_DEFINITIONS}
   ${PCL_DEFINITIONS}
 )
 
-
-## Declare a cpp library
-# add_library(realsense_camera
-#   src/${PROJECT_NAME}/realsense_camera.cpp
+## Declare a C++ library
+# add_library(ros_realsense
+#   src/${PROJECT_NAME}/ros_realsense.cpp
 # )
 
-## Declare a cpp executable
-# add_executable(realsense_camera_node src/realsense_camera_node.cpp)
+## Add cmake target dependencies of the library
+## as an example, code may need to be generated before libraries
+## either from message generation or dynamic reconfigure
+# add_dependencies(ros_realsense ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
-add_executable(realsense_camera_node
-  src/realsense_camera.cpp
-  src/capturer_mmap.cpp
-  src/v4l_unit.cpp
-  src/udev_unit.cpp
+## Declare a C++ executable
+add_executable(ros_realsense_node
+  src/ros_realsense.cpp
 )
 
-add_executable(realsense_camera_config_node
-  src/realsense_camera_config.cpp
-)
-
-## Add cmake target dependencies of the executable/library
-## as an example, message headers may need to be generated before nodes
-# add_dependencies(realsense_camera_node realsense_camera_generate_messages_cpp)
-
-
-add_dependencies(realsense_camera_node realsense_camera_generate_messages_cpp)
-add_dependencies(realsense_camera_config_node realsense_camera_generate_messages_cpp)
-add_dependencies(realsense_camera_node ${PROJECT_NAME}_gencfg)
-
+## Add cmake target dependencies of the executable
+## same as for the library above
+# add_dependencies(ros_realsense_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 ## Specify libraries to link a library or executable target against
-# target_link_libraries(realsense_camera_node
-#   ${catkin_LIBRARIES}
-# )
-
-
-target_link_libraries(realsense_camera_node
+target_link_libraries(ros_realsense_node
   ${catkin_LIBRARIES}
   ${OpenCV_LIBS}
   ${PCL_LIBRARIES}
   -ludev
+  -lrealsense
 )
-
-
-target_link_libraries(realsense_camera_config_node
-  ${catkin_LIBRARIES}
-)
-
 
 #############
 ## Install ##
@@ -217,7 +222,7 @@ target_link_libraries(realsense_camera_config_node
 # )
 
 ## Mark executables and/or libraries for installation
-# install(TARGETS realsense_camera realsense_camera_node
+# install(TARGETS ros_realsense ros_realsense_node
 #   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
 #   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
 #   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
@@ -242,7 +247,7 @@ target_link_libraries(realsense_camera_config_node
 #############
 
 ## Add gtest based cpp test target and link libraries
-# catkin_add_gtest(${PROJECT_NAME}-test test/test_realsense_camera.cpp)
+# catkin_add_gtest(${PROJECT_NAME}-test test/test_ros_realsense.cpp)
 # if(TARGET ${PROJECT_NAME}-test)
 #   target_link_libraries(${PROJECT_NAME}-test ${PROJECT_NAME})
 # endif()

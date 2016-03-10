@@ -13,6 +13,7 @@
 #include <camera_info_manager/camera_info_manager.h>
 
 #include <ros/package.h>
+#include <ros/console.h>
 
 #include <opencv2/opencv.hpp>
 
@@ -26,11 +27,11 @@
 
 #include "v4l_unit.h"
 
-#include "realsense_camera/realsenseConfig.h"
-#include "realsense_camera/get_rgb_uv.h"
+#include "realsense_camera_modified/realsenseConfig.h"
+#include "realsense_camera_modified/get_rgb_uv.h"
+#include <realsense_camera_modified/RealsenseCameraConfig.h>
 
 #include <dynamic_reconfigure/server.h>
-#include <realsense_camera/RealsenseCameraConfig.h>
 
 
 
@@ -675,7 +676,7 @@ int getNumDepthSubscribers()
 }
 
 void
-realsenseConfigCallback(const realsense_camera::realsenseConfig::ConstPtr &config)
+realsenseConfigCallback(const realsense_camera_modified::realsenseConfig::ConstPtr &config)
 {
 	if(debug_depth_unit)
 	{
@@ -685,7 +686,7 @@ realsenseConfigCallback(const realsense_camera::realsenseConfig::ConstPtr &confi
 }
 
 void
-dynamicReconfigCallback(realsense_camera::RealsenseCameraConfig &config, uint32_t level)
+dynamicReconfigCallback(realsense_camera_modified::RealsenseCameraConfig &config, uint32_t level)
 {
     if (capturer_mmap_set_control(&depth_stream, "Laser Power", config.laser_power))
     {
@@ -709,8 +710,8 @@ dynamicReconfigCallback(realsense_camera::RealsenseCameraConfig &config, uint32_
     }
 }
 
-bool getRGBUV(realsense_camera::get_rgb_uv::Request  &req,
-                realsense_camera::get_rgb_uv::Response &res)
+bool getRGBUV(realsense_camera_modified::get_rgb_uv::Request  &req,
+                realsense_camera_modified::get_rgb_uv::Response &res)
 {
     float uvx, uvy;
 
@@ -839,7 +840,9 @@ int main(int argc, char* argv[])
     //find realsense video device
     std::string target_device_name = "Intel(R) RealSense(TM) 3D Camer";
     std::vector<VIDEO_DEVICE> video_lists;
+    std::cout << video_lists.size() << std::endl;
     list_devices(target_device_name, video_lists);
+    std::cout << video_lists.size() << std::endl;
 
     if(video_lists.empty())
     {
@@ -946,7 +949,7 @@ int main(int argc, char* argv[])
     getRGBUVService = n.advertiseService("get_rgb_uv", getRGBUV);
 
     capturer_mmap_init_v4l2_controls();
-    dynamic_reconfigure::Server<realsense_camera::RealsenseCameraConfig> dynamic_reconfigure_server;
+    dynamic_reconfigure::Server<realsense_camera_modified::RealsenseCameraConfig> dynamic_reconfigure_server;
     dynamic_reconfigure_server.setCallback(boost::bind(&dynamicReconfigCallback, _1, _2));
 
     ros::Rate loop_rate(10);
