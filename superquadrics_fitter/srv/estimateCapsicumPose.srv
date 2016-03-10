@@ -1,8 +1,0 @@
-sensor_msgs/PointCloud2 cloud
----
-geometry_msgs/Transform transform
-float64 a
-float64 b
-float64 c
-float64 e1
-float64 e2
