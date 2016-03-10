@@ -186,15 +186,15 @@ int main(int argc, char** argv)
   //ros::Subscriber subCloudDepth;
   ros::Subscriber image_sub;
 
-  std::string topicColor = "/camera/rgb/image_raw";
-  std::string topicDepth = "/camera/depth/image_raw";
+  std::string topicColor = "/realsense/rgb/image_raw";
+  std::string topicDepth = "/realsense/depth/image_raw";
 
   //std::string topicColor = "/camera/image/rgb_raw";
   //std::string topicDepth = "/camera/image/depth_raw";
 
 
     // std::string topicCloudRGB = "/camera/depth_registered/points";
-      std::string topicCloudRGB = "/kinect2/qhd/points";
+      std::string topicCloudRGB = "/realsense/points";
   //std::string topicCloudDepth = "/camera/depth/points"*/;
 
   //subCloudRGB = nh_.subscribe(topicCloudRGB, 1);
