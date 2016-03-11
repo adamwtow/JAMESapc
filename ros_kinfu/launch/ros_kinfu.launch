@@ -1,16 +1,16 @@
 <?xml version="1.0" ?>
 <launch>
 
- <arg name="sim" default="false" />
+ <arg name="sim" default="true" />
  <group if="$(arg sim)">
   <arg name="kf_link_pose" default="0.0 0.0 0.0 0 0.0 0.0"/>
   <node pkg="tf" type="static_transform_publisher" name="kf_world_link_broadcaster"
        args="$(arg kf_link_pose) /kf_world /world 100" />
   <node pkg="tf" type="static_transform_publisher" name="camera_world_link_broadcaster"
-       args="$(arg kf_link_pose) /camera_link /world 100" />
+       args="$(arg kf_link_pose) /world /camera_link 100" />
   </group>
 
-  <node pkg="capsicum_detection" type="realsense_registration" name="realsense_registration" output="screen"> </node>
+  <!-- <node pkg="capsicum_detection" type="realsense_registration" name="realsense_registration" output="screen"> </node> -->
 
 
   <node pkg="ros_kinfu" type="ros_kinfu" name="ros_kinfu" output="screen">
