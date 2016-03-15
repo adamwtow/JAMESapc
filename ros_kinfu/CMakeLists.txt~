@@ -81,6 +81,7 @@ if (${KINFU_CONFIGURED})
 
   target_link_libraries(ros_kinfu
     boost_system boost_signals
+${VTK_LIBRARIES}
     ${CUDA_LIBRARIES}
     ${PCL_LIBRARIES}
     ${catkin_LIBRARIES}
