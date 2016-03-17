@@ -4,4 +4,4 @@ CMakeScripts
 Makefile
 cmake_install.cmake
 install_manifest.txt
-ros_realsense/src/build-ros_realsense-Desktop-Default/
+build_kinfu/src/build-ros_realsense-Desktop-Default/
