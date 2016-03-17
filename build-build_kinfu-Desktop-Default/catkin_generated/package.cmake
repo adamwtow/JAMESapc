@@ -1,0 +1,7 @@
+set(_CATKIN_CURRENT_PACKAGE "build_kinfu")
+set(build_kinfu_MAINTAINER "james <james@todo.todo>")
+set(build_kinfu_DEPRECATED "")
+set(build_kinfu_VERSION "0.0.0")
+set(build_kinfu_BUILD_DEPENDS )
+set(build_kinfu_RUN_DEPENDS )
+set(build_kinfu_BUILDTOOL_DEPENDS "catkin")

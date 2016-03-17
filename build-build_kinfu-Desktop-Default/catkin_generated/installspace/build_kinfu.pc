@@ -1,0 +1,8 @@
+prefix=/usr/local
+
+Name: build_kinfu
+Description: Description of build_kinfu
+Version: 0.0.0
+Cflags: 
+Libs: -L/usr/local/lib 
+Requires: 
