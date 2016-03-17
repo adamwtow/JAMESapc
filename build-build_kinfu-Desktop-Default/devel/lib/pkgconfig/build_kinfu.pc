@@ -1,8 +1,0 @@
-prefix=/home/james/ros_ws/src/JAMESapc/build-build_kinfu-Desktop-Default/devel
-
-Name: build_kinfu
-Description: Description of build_kinfu
-Version: 0.0.0
-Cflags: 
-Libs: -L/home/james/ros_ws/src/JAMESapc/build-build_kinfu-Desktop-Default/devel/lib 
-Requires: 
