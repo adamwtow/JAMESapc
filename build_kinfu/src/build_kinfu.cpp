@@ -107,7 +107,8 @@ class fruitpicker {
   std::vector<double> start_joint_values =
   {0.0, -0.55, 0.0, 0.75, 0.0, 1.26, 0.0};
 
-  ros::Publisher vis_pub;
+    ros::Publisher vis_pub;
+      ros::Publisher reset_pub;
   ros::Publisher command_topic_;
 
   moveit::planning_interface::MoveGroup::Plan left_plan;
@@ -159,6 +160,9 @@ public:
     vis_pub = nh_.advertise<visualization_msgs::Marker>("fruit_marker", 0);
     command_topic_ = nh_.advertise<baxter_core_msgs::EndEffectorCommand>("/robot/end_effector/left_gripper/command", 10);
 
+    reset_pub = nh_.advertise<std_msgs::Empty>("/ros_kinfu/reset",10);
+
+    std_msgs::Empty reset;
     cameraMatrixColor = cv::Mat::zeros(3, 3, CV_64F);
     cameraMatrixDepth = cv::Mat::zeros(3, 3, CV_64F);
 
@@ -277,8 +281,6 @@ public:
 
       geometry_msgs::PoseArray pose_array;
       geometry_msgs::Pose scan_pose;
-      pose_array.header.frame_id = "/world";
-      pose_array.header.stamp = ros::Time::now();
 
 
       double angle = 8*M_PI/180;
@@ -292,10 +294,12 @@ public:
       q_down.x = cos(angle); q_down.y = 0.0; q_down.z = sin(angle); q_down.w = 0.0;
 
       scan_pose = left_arm.getCurrentPose().pose;
-      ROS_INFO_STREAM(left_arm.getCurrentPose().header.frame_id);
-      // scan_pose.header.frame_id = "/world";
+      pose_array.header.frame_id = left_arm.getCurrentPose().header.frame_id;
+      pose_array.header.stamp = ros::Time::now();
+
       ROS_INFO("Starting to scan shelf.");
 
+      reset_pub.publish(reset);
       //Build up multiple views of capsicum
       left_arm.setMaxVelocityScalingFactor(velocity_scan);
 

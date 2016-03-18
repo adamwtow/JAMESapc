@@ -227,6 +227,7 @@ void ros_kinfu::execute(const sensor_msgs::Image::ConstPtr bgr, const sensor_msg
       if (tf_success)   {
         tf_listener.lookupTransform("/world", camera_frame_id, ros::Time(0), stamped_transform);
         tf_listener.lookupTransform(kinfu_publisher.kf_world_frame, camera_frame_id, ros::Time(0), kinect_transform);
+
       }
 
     }catch(tf::TransformException ex){
@@ -234,15 +235,16 @@ void ros_kinfu::execute(const sensor_msgs::Image::ConstPtr bgr, const sensor_msg
       ros::Duration(1.0).sleep();
     }
 
-    // update kinect world transform
-    if(update_kinect_world_) {
-      kinfu_publisher.updateKinectWorldTransform(stamped_transform,kinfu_.getCameraPose());
-    }
-
 
     if(reset_command_){
       kinfu_.reset();
       reset_kf_world();
+
+      // update kinect world transform
+      if(update_kinect_world_) {
+        kinfu_publisher.updateKinectWorldTransform(stamped_transform,kinfu_.getCameraPose());
+        cout << "blah" << endl;
+      }
 
       reset_command_ = false;
       ROS_INFO("KinFu was reset.");
