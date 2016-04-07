@@ -1,0 +1,4 @@
+std_msgs/String move_group
+geometry_msgs/PoseStamped initial_shelf_pose
+---
+std_msgs/Bool success
