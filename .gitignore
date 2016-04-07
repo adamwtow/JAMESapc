@@ -6,4 +6,5 @@ cmake_install.cmake
 install_manifest.txt
 ros_realsense-build/
 build-ros_realsense-Desktop-Default/
+ros_kinfu_old/
 .gitignore~
