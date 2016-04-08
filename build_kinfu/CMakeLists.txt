@@ -78,11 +78,10 @@ endif()
 # )
 
 ## Generate services in the 'srv' folder
-# add_service_files(
-#   FILES
-#   Service1.srv
-#   Service2.srv
-# )
+ add_service_files(
+   FILES
+shelf_scan_srv.srv
+ )
 
 ## Generate actions in the 'action' folder
 # add_action_files(
@@ -92,10 +91,12 @@ endif()
 # )
 
 ## Generate added messages and services with any dependencies listed here
-# generate_messages(
-#   DEPENDENCIES
-#   std_msgs  # Or other packages containing msgs
-# )
+generate_messages(
+ DEPENDENCIES
+ std_msgs
+ geometry_msgs
+ build_kinfu# Or other packages containing msgs
+)
 
 ################################################
 ## Declare ROS dynamic reconfigure parameters ##
@@ -136,7 +137,12 @@ catkin_package(
 ###########
 ## Build ##
 ###########
-
+execute_process(COMMAND find ${PROJECT_SOURCE_DIR} -type f OUTPUT_VARIABLE FILES_STRING)
+string(REPLACE "\n" ";" FILES_LIST ${FILES_STRING})
+add_custom_target(additional_files_${PROJECT_NAME}
+  SOURCES
+  ${FILES_LIST}
+)
 ## Specify additional locations of header files
 ## Your package locations should be listed before other locations
 # include_directories(include)
@@ -157,17 +163,22 @@ include_directories(include
 # add_dependencies(build_kinfu ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 ## Declare a C++ executable
-add_executable(build_kinfu src/build_kinfu.cpp)
+# add_executable(build_kinfu src/build_kinfu.cpp)
+add_executable(shelf_scan src/shelf_scan_node.cpp src/shelf_scan.cpp )
 
 ## Add cmake target dependencies of the executable
 ## same as for the library above
 # add_dependencies(build_kinfu_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 ## Specify libraries to link a library or executable target against
-target_link_libraries(build_kinfu
+#target_link_libraries(build_kinfu
+#    ${catkin_LIBRARIES}
+#    ${OpenCV_LIBS}
+#    ${PCL_LIBRARIES}
+#)
+target_link_libraries(shelf_scan
+   ${roscpp_LIBRARIES}
     ${catkin_LIBRARIES}
-    ${OpenCV_LIBS}
-    ${PCL_LIBRARIES}
 )
 
 #############
