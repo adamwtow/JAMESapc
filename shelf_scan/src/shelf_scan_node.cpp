@@ -1,21 +1,21 @@
 #include "shelf_scan.h"
 #include "shelf_scan_node.h"
-#include "build_kinfu/shelf_scan_srv.h"
+#include "shelf_scan/shelf_scan_srv.h"
 
 
-bool shelf_scanning(build_kinfu::shelf_scan_srv::Request  &req,
-  build_kinfu::shelf_scan_srv::Response &res){
+bool shelf_scan_callback(shelf_scan::shelf_scan_srv::Request  &req,
+  shelf_scan::shelf_scan_srv::Response &res){
 
     static tf::TransformListener tf_listener;
 
     ROS_INFO_STREAM("Shelf pose recieved: " << req.initial_shelf_pose);
 
-    shelf_scan shelf_scan(req.move_group.data, req.initial_shelf_pose);
+    shelf_scanner shelf_scanner(req.move_group.data, req.initial_shelf_pose);
 
     try{
 
-      shelf_scan.generatePath();
-      shelf_scan.execute();
+      shelf_scanner.generatePath();
+      shelf_scanner.execute();
 
     }catch(tf::TransformException ex){
 
@@ -38,7 +38,7 @@ bool shelf_scanning(build_kinfu::shelf_scan_srv::Request  &req,
 
     ros::NodeHandle nh_("~");
 
-    ros::ServiceServer move_tf_service = nh_.advertiseService("/shelf_scan", &shelf_scanning);
+    ros::ServiceServer move_tf_service = nh_.advertiseService("/shelf_scan", &shelf_scan_callback);
 
     ros::AsyncSpinner spinner(2);
     spinner.start();

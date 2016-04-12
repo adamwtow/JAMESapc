@@ -8,7 +8,7 @@
 #include <tf/transform_broadcaster.h>
 #include <eigen_conversions/eigen_msg.h>
 
-shelf_scan::shelf_scan(std::string move_group, geometry_msgs::PoseStamped initial_pose)
+shelf_scanner::shelf_scanner(std::string move_group, geometry_msgs::PoseStamped initial_pose)
 {
   // save shelf initial pose
   shelf_pose = initial_pose;
@@ -21,7 +21,7 @@ shelf_scan::shelf_scan(std::string move_group, geometry_msgs::PoseStamped initia
   init();
 }
 
-void shelf_scan::init(){
+void shelf_scanner::init(){
 
   //set up moveit_lib service clients
   pose_client = nh_.serviceClient<moveit_lib::move_robot_pose>("moveit_lib/move_robot_pose");
@@ -35,18 +35,20 @@ void shelf_scan::init(){
   pause_pub = nh_.advertise<std_msgs::Empty>("/ros_kinfu/pause",10);
   unpause_pub = nh_.advertise<std_msgs::Empty>("/ros_kinfu/unpause",10);
 
+  ros::Publisher points_pub;
+
   // temporary variables
   start_q = {0.0,0.707,0.0,0.707};
   delta_xyz = {0.10, 0.10, 0.10};
   scan_offset = {0.35, 0.0, 0.08};
   radius = 0.10;
-  distance = 0.20;
+  distance = 0.5;
   segments = 36;
 
 }
 
 // currently not used, unlikely to be
-void shelf_scan::reinit(std::string move_group, geometry_msgs::PoseStamped initial_pose){
+void shelf_scanner::reinit(std::string move_group, geometry_msgs::PoseStamped initial_pose){
 
   shelf_pose = initial_pose;
   pose_srv.request.move_group.data = move_group;
@@ -55,52 +57,53 @@ void shelf_scan::reinit(std::string move_group, geometry_msgs::PoseStamped initi
 }
 
 // generate desired path, expand later for various different path options
-void shelf_scan::generatePath(){
+void shelf_scanner::generatePath(){
 
-  scanShelf(start_q, delta_xyz,scan_offset);
-  // createConeTrajectory(radius, distance, segments, waypoints)
+  // createSimplePath(start_q, delta_xyz,scan_offset);
+  createConePath(radius, distance, segments);
 
 }
 
-// void shelf_scan::createConeTrajectory(geometry_msgs::Pose initial_pose, float radius, float distance, int segments, geometry_msgs::PoseArray &waypoints) {
-//
-//   float arc_theta = 2*M_PI / segments;
-//   float current_theta = 0.0;
-//   geometry_msgs::Pose pose;
-//
-//   while(current_theta < 2*M_PI){
-//
-//     pose = initial_pose;
-//
-//     float dy = radius*sin(current_theta);
-//     float dz = radius*cos(current_theta);
-//
-//     float theta_y = atan2(dy,distance);
-//     float theta_z = atan2(dz,distance);
-//
-//     pose.position.y += dy;
-//     pose.position.z += dz;
-//
-//
-//     tf::Quaternion quat(0,theta_y,theta_z);
-//     // double roll, pitch, yaw;
-//     // tf::Matrix3x3(pose.orientation).getRPY(roll, pitch, yaw);
-//
-//     // roll +=
-//     tf::Quaternion currentQuat;
-//     tf::quaternionMsgToTF(pose.orientation,currentQuat);
-//     tf::quaternionTFToMsg(currentQuat.dot(quat),pose.orientation);
-//
-//     current_theta += arc_theta;
-//
-//     waypoints.poses.push_back(pose);
-//   }
-//
-// }
+void shelf_scanner::createConePath(float radius, float distance, int segments) {
+  tf::TransformListener tf_listener;
+  float arc_theta = 2*M_PI / segments;
+  float current_theta = 0.0;
+  geometry_msgs::Pose pose;
+  waypoints.header.frame_id = shelf_pose.header.frame_id;
+  waypoints.header.stamp = ros::Time::now();
+  while(current_theta < 2*M_PI){
+
+    pose = shelf_pose.pose;
+
+    float dy = radius*sin(current_theta);
+    float dz = radius*cos(current_theta);
+
+    float theta_y = atan2(dy,distance);
+    float theta_z = atan2(dz,distance);
+
+    pose.position.y += dy;
+    pose.position.z += dz;
+
+    tf::Quaternion quat(theta_z,theta_y,0);
+
+    tf::Quaternion quat2(M_PI/2,0,0);
+
+    quat2 *= quat;
+    tf::quaternionTFToMsg(quat2,pose.orientation);
+
+    current_theta += arc_theta;
+
+    // pose.orientation = quat;
+
+    waypoints.poses.push_back(pose);
+  }
+  waypoints.poses.push_back(shelf_pose.pose);
+
+}
 
 
 //temporary waypoint generator
-bool shelf_scan::scanShelf(Eigen::Vector4d start_q_eigen, Eigen::Vector3d delta_xyz, Eigen::Vector3d scan_offset){
+bool shelf_scanner::createSimplePath(Eigen::Vector4d start_q_eigen, Eigen::Vector3d delta_xyz, Eigen::Vector3d scan_offset){
 
   Eigen::Vector3d scan_xyz;
 
@@ -149,34 +152,29 @@ bool shelf_scan::scanShelf(Eigen::Vector4d start_q_eigen, Eigen::Vector3d delta_
   scan_pose.position.z += delta_xyz[2];
   // scan_pose.orientation = start_q;
   waypoints.poses.push_back(scan_pose);
-  // createConeTrajectory(scan_pose,0.10,0.2,36,waypoints);
-  vis_pub.publish(waypoints);
 
   return true;
 
 }
 
-void shelf_scan::execute(){
+void shelf_scanner::execute(){
 
   // send moveit_lib move to pose command
   pose_srv.request.target_pose = shelf_pose;
-  pose_client.call(pose_srv);
+  bool success = pose_client.call(pose_srv);
 
   // if pose not successful, throw exception
-  if(!pose_srv.response.success.data){ROS_INFO_STREAM(pose_srv.response.success.data);throw;}
+  if(!success){ROS_INFO_STREAM(pose_srv.response.success.data);throw;}
 
   // unpause and reset kinfu
   unpause_pub.publish(empty_msg);
   reset_pub.publish(empty_msg);
 
-  // perform shelf scan motion (currently generates points and calls moveit_lib PoseArray motion)
-  // if(!scanShelf(shelf_pose, start_q, delta_xyz, scan_offset)){throw;}
-
   pose_array_srv.request.target_pose_array = waypoints;
+  vis_pub.publish(waypoints);
+  ROS_INFO_STREAM("Starting to scan shelf.");
 
-  ROS_INFO_STREAM("Waypoints generated. Starting to scan shelf.");
-
-  bool success = pose_array_client.call(pose_array_srv);
+  success = pose_array_client.call(pose_array_srv);
 
   if(!success){ROS_INFO_STREAM("Pose array failed");throw;}
 

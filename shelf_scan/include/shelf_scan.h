@@ -21,16 +21,16 @@
 //use this define for enabling debug information with move_group planner and execution
 // #define DEBUG
 
-class shelf_scan
+class shelf_scanner
 {
 public:
   //Class Constructor
-  shelf_scan(std::string move_group, geometry_msgs::PoseStamped initial_pose);
+  shelf_scanner(std::string move_group, geometry_msgs::PoseStamped initial_pose);
 
   void init();
   void reinit(std::string move_group, geometry_msgs::PoseStamped initial_pose);
-  bool scanShelf(Eigen::Vector4d start_q_eigen, Eigen::Vector3d delta_xyz, Eigen::Vector3d scan_offset);
-  // void createConeTrajectory(geometry_msgs::Pose initial_pose, float radius, float distance, int segments, geometry_msgs::PoseArray &waypoints);
+  bool createSimplePath(Eigen::Vector4d start_q_eigen, Eigen::Vector3d delta_xyz, Eigen::Vector3d scan_offset);
+  void createConePath(float radius, float distance, int segments);
   void generatePath();
   void execute();
 

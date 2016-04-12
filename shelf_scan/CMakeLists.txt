@@ -1,46 +1,16 @@
 cmake_minimum_required(VERSION 2.8.3)
-project(build_kinfu)
+project(shelf_scan)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x -DBT_USE_DOUBLE_PRECISION -Wall")
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED
-    baxter_core_msgs
     roscpp
-    image_transport
-    sensor_msgs
-    cv_bridge
-    message_filters
-    moveit_core
-    moveit_ros_planning
-    moveit_ros_planning_interface
     tf
+    message_generation
     )
 
-## System dependencies are found with CMake's conventions
-# find_package(Boost REQUIRED COMPONENTS system)
-
-find_package(OpenCV REQUIRED)
-find_package(OpenMP)
-#find_package(PCL 1.8 REQUIRED)
-
-if (EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/cmake/CustomPCLConfig.cmake")
-    set(PCL_CONFIGURED true)
-    message(STATUS "pcl: cmake/CustomPCLConfig.cmake found, project will be built.")
-else()
-    set(PCL_CONFIGURED false)
-    message(WARNING "pcl: cmake/CustomPCLConfig.cmake not found, project won't be built.")
-endif()
-
-if (${PCL_CONFIGURED})
-    include(cmake/CustomPCLConfig.cmake)
-    message(STATUS "pcl: Looking for PCL configuration file at " ${PCL_DIR})
-    find_package(PCL CONFIG REQUIRED)
-    include_directories(${PCL_INCLUDE_DIRS})
-    link_directories(${PCL_LIBRARY_DIRS})
-    add_definitions(${PCL_DEFINITIONS})
-endif()
 ## Uncomment this if the package has a setup.py. This macro ensures
 ## modules and global scripts declared therein get installed
 ## See http://ros.org/doc/api/catkin/html/user_guide/setup_dot_py.html
@@ -95,7 +65,7 @@ generate_messages(
  DEPENDENCIES
  std_msgs
  geometry_msgs
- build_kinfu# Or other packages containing msgs
+ build_kinfu
 )
 
 ################################################
@@ -128,7 +98,7 @@ generate_messages(
 ## CATKIN_DEPENDS: catkin_packages dependent projects also need
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
-    CATKIN_DEPENDS #baxter_core_msgs cv_bridge roscpp image_transport message_filters moveit_core moveit_ros_planning moveit_ros_planning_interface
+    CATKIN_DEPENDS
     #INCLUDE_DIRS include
     #  LIBRARIES fruit_picking_test
     # DEPENDS system_lib
@@ -146,6 +116,7 @@ add_custom_target(additional_files_${PROJECT_NAME}
 ## Specify additional locations of header files
 ## Your package locations should be listed before other locations
 # include_directories(include)
+
 include_directories(include
     ${catkin_INCLUDE_DIRS}
     ${OpenCV_INCLUDE_DIR}
@@ -163,7 +134,6 @@ include_directories(include
 # add_dependencies(build_kinfu ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 ## Declare a C++ executable
-# add_executable(build_kinfu src/build_kinfu.cpp)
 add_executable(shelf_scan src/shelf_scan_node.cpp src/shelf_scan.cpp )
 
 ## Add cmake target dependencies of the executable
@@ -171,11 +141,7 @@ add_executable(shelf_scan src/shelf_scan_node.cpp src/shelf_scan.cpp )
 # add_dependencies(build_kinfu_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 ## Specify libraries to link a library or executable target against
-#target_link_libraries(build_kinfu
-#    ${catkin_LIBRARIES}
-#    ${OpenCV_LIBS}
-#    ${PCL_LIBRARIES}
-#)
+
 target_link_libraries(shelf_scan
    ${roscpp_LIBRARIES}
     ${catkin_LIBRARIES}
