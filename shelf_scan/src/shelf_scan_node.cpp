@@ -12,22 +12,19 @@ bool shelf_scan_callback(shelf_scan::shelf_scan_srv::Request  &req,
 
     shelf_scanner shelf_scanner(req.move_group.data, req.initial_shelf_pose);
 
-    try{
 
-      shelf_scanner.generatePath();
-      shelf_scanner.execute();
+    bool success = shelf_scanner.execute();
 
-    }catch(tf::TransformException ex){
+    if (!success) {
 
-      ROS_ERROR("%s",ex.what());
       res.success.data = false;
-      return false;
+
+    } else {
+
+      res.success.data = true;
 
     }
-
-    res.success.data = true;
     return true;
-
   }
 
 
@@ -38,7 +35,7 @@ bool shelf_scan_callback(shelf_scan::shelf_scan_srv::Request  &req,
 
     ros::NodeHandle nh_("~");
 
-    ros::ServiceServer move_tf_service = nh_.advertiseService("/shelf_scan", &shelf_scan_callback);
+    ros::ServiceServer scan_service = nh_.advertiseService("/shelf_scan", &shelf_scan_callback);
 
     ros::AsyncSpinner spinner(2);
     spinner.start();

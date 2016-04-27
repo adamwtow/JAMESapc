@@ -6,6 +6,7 @@
 
 #include <geometry_msgs/PoseStamped.h>
 #include <std_msgs/Empty.h>
+#include <sensor_msgs/PointCloud2.h>
 
 
 #include "moveit_lib/move_robot_tf.h"
@@ -29,10 +30,11 @@ public:
 
   void init();
   void reinit(std::string move_group, geometry_msgs::PoseStamped initial_pose);
-  bool createSimplePath(Eigen::Vector4d start_q_eigen, Eigen::Vector3d delta_xyz, Eigen::Vector3d scan_offset);
   void createConePath(float radius, float distance, int segments);
   void generatePath();
-  void execute();
+  void kinfu_callback(const sensor_msgs::PointCloud2& msg);
+  void publishKinfuCloud();
+  bool execute();
 
   ros::NodeHandle nh_;
   geometry_msgs::PoseStamped shelf_pose;
@@ -40,6 +42,10 @@ public:
   ros::Publisher reset_pub;
   ros::Publisher pause_pub;
   ros::Publisher unpause_pub;
+  ros::Publisher kinfu_pub;
+  ros::Subscriber kinfu_sub;
+
+  sensor_msgs::PointCloud2 shelf_cloud;
 
   moveit_lib::move_robot_pose pose_srv;
   moveit_lib::move_robot_pose_array pose_array_srv;
@@ -47,13 +53,13 @@ public:
 
   ros::ServiceClient pose_client;
   ros::ServiceClient pose_array_client;
-  Eigen::Vector4d start_q;
-  Eigen::Vector3d delta_xyz,scan_offset;
 
   geometry_msgs::PoseArray waypoints;
+
   float radius;
   float distance;
   int segments;
+  bool scanning;
 
 };
 

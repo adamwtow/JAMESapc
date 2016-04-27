@@ -35,15 +35,15 @@ void shelf_scanner::init(){
   pause_pub = nh_.advertise<std_msgs::Empty>("/ros_kinfu/pause",10);
   unpause_pub = nh_.advertise<std_msgs::Empty>("/ros_kinfu/unpause",10);
 
-  ros::Publisher points_pub;
+  kinfu_pub = nh_.advertise<sensor_msgs::PointCloud2>("/shelf_scan/shelf_cloud",10);
+  kinfu_sub = nh_.subscribe("/ros_kinfu/depth_registered/points",  1, &shelf_scanner::kinfu_callback, this);
 
   // temporary variables
-  start_q = {0.0,0.707,0.0,0.707};
-  delta_xyz = {0.10, 0.10, 0.10};
-  scan_offset = {0.35, 0.0, 0.08};
   radius = 0.10;
   distance = 0.5;
   segments = 36;
+
+  scanning = true;
 
 }
 
@@ -59,18 +59,21 @@ void shelf_scanner::reinit(std::string move_group, geometry_msgs::PoseStamped in
 // generate desired path, expand later for various different path options
 void shelf_scanner::generatePath(){
 
-  // createSimplePath(start_q, delta_xyz,scan_offset);
   createConePath(radius, distance, segments);
 
 }
 
 void shelf_scanner::createConePath(float radius, float distance, int segments) {
+
   tf::TransformListener tf_listener;
+
   float arc_theta = 2*M_PI / segments;
   float current_theta = 0.0;
+
   geometry_msgs::Pose pose;
   waypoints.header.frame_id = shelf_pose.header.frame_id;
   waypoints.header.stamp = ros::Time::now();
+
   while(current_theta < 2*M_PI){
 
     pose = shelf_pose.pose;
@@ -78,11 +81,11 @@ void shelf_scanner::createConePath(float radius, float distance, int segments) {
     float dy = radius*sin(current_theta);
     float dz = radius*cos(current_theta);
 
-    float theta_y = atan2(dy,distance);
-    float theta_z = atan2(dz,distance);
-
     pose.position.y += dy;
     pose.position.z += dz;
+
+    float theta_z = atan2(dz,distance);
+    float theta_y = atan2(dy,distance);
 
     tf::Quaternion quat(theta_z,theta_y,0);
 
@@ -93,78 +96,41 @@ void shelf_scanner::createConePath(float radius, float distance, int segments) {
 
     current_theta += arc_theta;
 
-    // pose.orientation = quat;
+    // pose.orientation = shelf_pose.pose.orientation;
 
     waypoints.poses.push_back(pose);
+
   }
+
   waypoints.poses.push_back(shelf_pose.pose);
 
 }
 
+void shelf_scanner::kinfu_callback(const sensor_msgs::PointCloud2& msg) {
 
-//temporary waypoint generator
-bool shelf_scanner::createSimplePath(Eigen::Vector4d start_q_eigen, Eigen::Vector3d delta_xyz, Eigen::Vector3d scan_offset){
-
-  Eigen::Vector3d scan_xyz;
-
-  geometry_msgs::Quaternion start_q, q_left,q_right,q_up,q_down;
-
-  geometry_msgs::Pose scan_pose;
-
-  double angle = 8*M_PI/180;
-
-  start_q.x = start_q_eigen[0]; start_q.y = start_q_eigen[1]; start_q.z = start_q_eigen[2]; start_q.w = start_q_eigen[3];
-
-  q_left.x = cos(-angle); q_left.y = sin(-angle); q_left.z = 0.0; q_left.w = 0.0;
-  q_up.x = cos(-angle); q_up.y = 0.0; q_up.z = sin(-angle); q_up.w = 0.0;
-  q_right.x = cos(angle); q_right.y = sin(angle); q_right.z = 0.0; q_right.w = 0.0;
-  q_down.x = cos(angle); q_down.y = 0.0; q_down.z = sin(angle); q_down.w = 0.0;
-
-  scan_pose = shelf_pose.pose;
-
-  waypoints.header.stamp = ros::Time::now();
-  waypoints.header.frame_id = "base";
-  //Waypoint scan left
-  scan_pose.position.y += delta_xyz[1];
-  // scan_pose.orientation = q_left;
-  waypoints.poses.push_back(scan_pose);
-
-  //Waypoint scan up
-  scan_pose.position.y -= delta_xyz[1];
-  scan_pose.position.z += delta_xyz[2];
-  // scan_pose.orientation = q_up;
-  waypoints.poses.push_back(scan_pose);
-
-  //Waypoint scan right
-  scan_pose.position.z -= delta_xyz[2];
-  scan_pose.position.y -= delta_xyz[1];
-  // scan_pose.orientation = q_right;
-  waypoints.poses.push_back(scan_pose);
-
-  // scan down
-  scan_pose.position.y += delta_xyz[1];
-  scan_pose.position.z -= delta_xyz[2];
-  // scan_pose.orientation = q_down;
-  waypoints.poses.push_back(scan_pose);
-
-
-  //Waypoint back to start;
-  scan_pose.position.z += delta_xyz[2];
-  // scan_pose.orientation = start_q;
-  waypoints.poses.push_back(scan_pose);
-
-  return true;
+  if(!scanning) {
+    shelf_cloud = msg;
+  }
 
 }
 
-void shelf_scanner::execute(){
+void shelf_scanner::publishKinfuCloud() {
 
+  kinfu_pub.publish(shelf_cloud);
+  ROS_INFO_STREAM("Scanned shelf cloud published");
+  scanning = true;
+
+}
+
+bool shelf_scanner::execute(){
+
+  generatePath();
   // send moveit_lib move to pose command
   pose_srv.request.target_pose = shelf_pose;
   bool success = pose_client.call(pose_srv);
 
   // if pose not successful, throw exception
-  if(!success){ROS_INFO_STREAM(pose_srv.response.success.data);throw;}
+  if(!success){ROS_INFO_STREAM(pose_srv.response.success.data);return false;}
 
   // unpause and reset kinfu
   unpause_pub.publish(empty_msg);
@@ -174,16 +140,18 @@ void shelf_scanner::execute(){
   vis_pub.publish(waypoints);
   ROS_INFO_STREAM("Starting to scan shelf.");
 
+  scanning = false;
   success = pose_array_client.call(pose_array_srv);
-
-  if(!success){ROS_INFO_STREAM("Pose array failed");throw;}
-
+  if(!success){ROS_INFO_STREAM("Pose array failed");return false;}
   ROS_INFO("Finished scanning shelf.");
 
   //pause kinfu
   pause_pub.publish(empty_msg);
 
+
   //clear waypoints
   waypoints.poses.clear();
+  publishKinfuCloud();
+  return true;
 
 }
