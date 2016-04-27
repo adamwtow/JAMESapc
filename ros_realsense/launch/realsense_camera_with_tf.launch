@@ -10,4 +10,8 @@
         <arg name="camera" value="$(arg camera)" />
     </include>
 
+    <!-- Transform between realsense camera and right hand -->
+    <node pkg="tf" type="static_transform_publisher" name="hand_to_camera_tf"
+       args="-0.04 0.0 0.00 0.0 -1.57 0.0 /right_hand /camera_link 100" />
+
 </launch>

@@ -66,6 +66,7 @@ int main(int argc, char * argv[]) try
   rs::context ctx;
   if(ctx.get_device_count() == 0) throw std::runtime_error("No device detected. Is it plugged in?");
 
+  ROS_INFO_STREAM("Num devices: " << ctx.get_device_count());
   rs::device * dev = ctx.get_device(0);
   // enable the various camera streams
   dev->enable_stream(rs::stream::depth, rs::preset::best_quality);
@@ -102,7 +103,7 @@ int main(int argc, char * argv[]) try
   rs::intrinsics color_aligned_intrin = dev->get_stream_intrinsics(rs::stream::color_aligned_to_depth);
   rs::extrinsics depth_to_color = dev->get_extrinsics(rs::stream::depth, rs::stream::color);
   float scale = dev->get_depth_scale();
-
+  ROS_INFO_STREAM(scale);
   intrinsToCameraInfo(color_intrin,color_camera_info);
   intrinsToCameraInfo(depth_intrin,depth_camera_info);
   intrinsToCameraInfo(ir_intrin,ir_camera_info);
@@ -216,10 +217,10 @@ int main(int argc, char * argv[]) try
       depth_image_raw.convertTo(depth_image_scaled,CV_64FC1);
 
       // in mm
-      depth_image_scaled *= 1000.0f*scale;
+      // depth_image_scaled *= 1000.0f*scale;
 
       //in deci-mm
-      // depth_image_scaled *= 1000.0f*scale;
+      depth_image_scaled *= 10000.0f*scale;
 
       depth_image_scaled.convertTo(depth_image,CV_16UC1);
 
