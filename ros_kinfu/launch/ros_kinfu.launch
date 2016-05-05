@@ -1,7 +1,9 @@
 <?xml version="1.0" ?>
 <launch>
 
+  <arg name="realsense" default="false" />
  <arg name="sim" default="false" />
+
  <group if="$(arg sim)">
   <arg name="kf_link_pose" default="0.0 0.0 0.0 0 0.0 0.0"/>
   <node pkg="tf" type="static_transform_publisher" name="kf_world_link_broadcaster"
@@ -10,18 +12,21 @@
        args="$(arg kf_link_pose) /world /camera_link 100" />
   </group>
 
-   <arg name="build_kinfu" default="true" />
+   <arg name="build_kinfu" default="false" />
    <group if="$(arg build_kinfu)">
     <arg name="kf_link_pose" default="0.0 0.0 0.0 0.0 -1.57 0.0"/>
     <!-- <node pkg="tf" type="static_transform_publisher" name="kf_world_link_broadcaster"
          args="$(arg kf_link_pose) /kf_world /world 100" /> -->
     <node pkg="tf" type="static_transform_publisher" name="camera_world_link_broadcaster"
-         args="$(arg kf_link_pose) /left_hand /camera_link 100" />
+         args="$(arg kf_link_pose) /world /camera_link 100" />
     </group>
   <!-- <node pkg="capsicum_detection" type="realsense_registration" name="realsense_registration" output="screen"> </node> -->
 
+  <group if="$(arg realsense)">
+  <include file="$(find ros_realsense)/launch/realsense_camera.launch"/>
+  </group>
 
-  <node pkg="ros_kinfu" type="ros_kinfu" name="ros_kinfu" output="screen">
+  <node pkg="ros_kinfu" type="ros_kinfu" name="ros_kinfu" output="screen" respawn="true">
 
     <!-- INPUT Subscriber Topics -->
     <!--param name="depth_image_topic" value="/camera/depth/image_raw" -->
@@ -57,7 +62,7 @@
     <param name="image_height" value="480" />
     <param name="image_width" value="640" />
 
-    <param name="volume_size" value="1.0" />
+    <param name="volume_size" value="0.5" />
     <param name="tsdf_trunc" value="0.005" />
     <param name="icp_weight" value="0.01" />
     <param name="camera_movement_threshold" value="0.001" />

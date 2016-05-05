@@ -178,11 +178,12 @@ void ros_kinfu::togglePublisher()
 void ros_kinfu::resetCallback(const std_msgs::Empty & /*msg*/)
 {
   reset_command_ = true;
+  pause_command_ = false;
 }
 
 void ros_kinfu::pauseCallback(const std_msgs::Empty & /*msg*/)
 {
-  pause_command_ = !pause_command_;
+  pause_command_ = true;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -282,13 +283,15 @@ void ros_kinfu::execute(const sensor_msgs::Image::ConstPtr bgr, const sensor_msg
       has_image = kinfu_.operator()(depth_device_);
     }
 
+    // process camera pose
+    if (pose_processor_)
+    {
+      pose_processor_->processPose (kinfu_.getCameraPose ());
+    }
+
   }
 
-  // process camera pose
-  if (pose_processor_)
-  {
-    pose_processor_->processPose (kinfu_.getCameraPose ());
-  }
+
 
 
   if(publish_){
